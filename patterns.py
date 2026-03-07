@@ -38,7 +38,7 @@ UPPER_L4_PROTO = (
     r'^access-list\W(?P<zone>\S+)\sline\s'
     r'(?P<num_line>\d+)\sextended\s'
     r'(?P<rule>(?:permit|deny))\s'
-    r'(?P<proto_l3>tcp|udp)\s(?:object-group\s'
+    r'(?P<proto_l4>tcp|udp)\s(?:object-group\s'
     r'(?P<obj_gr_src>\S+)|host\s'
     r'(?P<host_src>(?:\d{1,3}\.){3}\d{1,3})|'
     r'(?P<any_src>any[4]?)|object\s'

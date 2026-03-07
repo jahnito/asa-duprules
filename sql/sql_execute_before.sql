@@ -5,6 +5,7 @@ CREATE TABLE "upper_rules" (
 	"rule"	TEXT NOT NULL,
 	"obj_gr_serv"	TEXT,
 	"proto_l3"	TEXT,
+	"proto_l4"	TEXT,
 	"obj_gr_src"	TEXT,
 	"host_src"	TEXT,
 	"any_src"	TEXT,
