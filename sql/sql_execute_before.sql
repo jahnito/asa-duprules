@@ -1,0 +1,23 @@
+CREATE TABLE "upper_rules" (
+	"id"	INTEGER,
+	"zone"	TEXT NOT NULL,
+	"num_line"	TEXT NOT NULL,
+	"rule"	TEXT NOT NULL,
+	"obj_gr_serv"	TEXT,
+	"proto_l3"	TEXT,
+	"obj_gr_src"	TEXT,
+	"host_src"	TEXT,
+	"any_src"	TEXT,
+	"object_src"	TEXT,
+	"prefix_src"	TEXT,
+	"obj_gr_dst"	TEXT,
+	"host_dst"	TEXT,
+	"any_dst"	BLOB,
+	"object_dst"	TEXT,
+	"proto_port"	TEXT,
+	"proto_ports"	TEXT,
+	"prefix_dst"	TEXT,
+	"inactive"	TEXT,
+	"hit_count"	TEXT,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
