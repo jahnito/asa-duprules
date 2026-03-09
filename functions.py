@@ -4,6 +4,7 @@ import tomllib
 from pathlib import Path
 
 from patterns import UPPER_OBJ, UPPER_L3_PROTO, UPPER_L4_PROTO
+from patterns import SUBRULE_L3, SUBRULE_L4
 
 
 def init_database(config: dict):
@@ -19,7 +20,7 @@ def init_database(config: dict):
         with open('sql/sql_execute_before.sql') as f:
             queryes = f.read()
         cursor = conn.cursor()
-        cursor.execute(queryes)
+        cursor.executescript(queryes)
         conn.commit()
 
 
@@ -39,34 +40,30 @@ def define_rule(line: str, config):
     # Верхнеуровневое правило
     if line.startswith('access-list'):
         if re_match := re.fullmatch(UPPER_OBJ, line):
-            ins_upper_obj(re_match, config)
+            ins_obj(re_match, config, 'upper_rules')
             pass
         if re_match := re.fullmatch(UPPER_L3_PROTO, line):
-            ins_upper_obj(re_match, config)
+            ins_obj(re_match, config, 'upper_rules')
             pass
         if re_match := re.fullmatch(UPPER_L4_PROTO, line):
-            ins_upper_obj(re_match, config)
+            ins_obj(re_match, config, 'upper_rules')
             pass
+    if line.startswith(' '):
+        if re_match := re.fullmatch(SUBRULE_L3, line):
+            ins_obj(re_match, config, 'rules')
+        if re_match := re.fullmatch(SUBRULE_L4, line):
+            ins_obj(re_match, config, 'rules')
 
 
-def ins_upper_obj(re_match: re.Match, config: dict):
+def ins_obj(re_match: re.Match, config: dict, table: str):
     finded_objects = {k: v for k, v in re_match.groupdict().items() if v is not None}
-
-    # if config['debug']:
-    #     elements = 0
-    #     for key, value in finded_objects.items():
-    #         print(elements + 1, key, ':', value)
-    #         elements += 1
-    #     input()
-    
     database = config.get('database')
     query = (
-        'INSERT INTO upper_rules ('
+        f'INSERT INTO {table} ('
         f'{", ".join(finded_objects.keys())}'
         ') VALUES ('
         f'{"?, " * (len(finded_objects) - 1)} ?)'
     )
-
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
         cursor.execute(query, tuple(finded_objects.values()))

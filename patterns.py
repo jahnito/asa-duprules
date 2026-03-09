@@ -55,3 +55,12 @@ UPPER_L4_PROTO = (
     r'(?P<proto_ports>\d{1,5}\s\d{1,5}))\s(?:'
     r'(?P<inactive>inactive)\s)?\(hitcnt=(?P<hit_count>\d+)\).+$'
 )
+
+
+SUBRULE_L3 = (
+    r'^\s{1,2}access-list\s(?P<zone>\S+)\sline\s(?P<num_line>\d+)\sextended\s(?P<rule>permit|deny)\s(?:(?P<proto_l3>ip|icmp)|(?P<proto_num>\d+))\s(?:host\s(?P<host_src>(?:\d{1,3}\.){3}\d{1,3})|(?P<prefix_src>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}\.){3}\d{1,3})|(?P<any_src>(?:any|any4)))\s(?:host\s(?P<host_dst>(?:\d{1,3}\.){3}\d{1,3})|(?P<prefix_dst>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}\.){3}\d{1,3})|(?P<any_dst>(?:any|any4)))(?:\s(?P<inactive>inactive))?\s\(hitcnt=(?P<hit_count>\d+)\).+$'
+)
+
+SUBRULE_L4 = (
+    r'^\s{1,2}access-list\s(?P<zone>\S+)\sline\s(?P<num_line>\d+)\sextended\s(?P<rule>permit|deny)\s(?P<proto_l4>(tcp|udp))\s(?:host\s(?P<host_src>(?:\d{1,3}\.){3}\d{1,3})|(?P<prefix_src>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}\.){3}\d{1,3})|(?P<any_src>(?:any|any4)))\s(?:host\s(?P<host_dst>(?:\d{1,3}\.){3}\d{1,3})|(?P<prefix_dst>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}\.){3}\d{1,3})|(?P<any_dst>(?:any|any4)))\s(?:eq\s(?P<proto_port>(?:\S+|\d+))|range\s(?P<proto_ports>(?:(?:\d{1,5}|\S+)\s(?:\d{1,5}|\S+))))(?:\s(?P<inactive>inactive))?\s\(hitcnt=(?P<hit_count>\d+)\).+$'
+)

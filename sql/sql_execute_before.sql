@@ -22,3 +22,24 @@ CREATE TABLE "upper_rules" (
 	"hit_count"	TEXT,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
+
+CREATE TABLE "rules" (
+	"id"	INTEGER,
+	"zone"	TEXT NOT NULL,
+	"num_line"	TEXT NOT NULL,
+	"rule"	TEXT NOT NULL,
+	"proto_l3"	TEXT,
+	"proto_l4"	TEXT,
+	"proto_num"	TEXT,
+	"host_src"	TEXT,
+	"prefix_src"	TEXT,
+	"any_src"	TEXT,
+	"host_dst"	TEXT,
+	"prefix_dst"	TEXT,
+	"any_dst"	TEXT,
+	"proto_port"	TEXT,
+	"proto_ports"	TEXT,
+	"inactive"	TEXT,
+	"hit_count"	TEXT,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);

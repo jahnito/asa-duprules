@@ -4,10 +4,9 @@ CFG = init_app()
 
 
 if __name__ == '__main__':
-    print(CFG.get('database'))
-    print(CFG.get('dataset'))
-    print(CFG.get('debug'))
-    # result = 0
+    # print(CFG.get('database'))
+    # print(CFG.get('dataset'))
+    # print(CFG.get('debug'))
     for i in CFG['rules']:
         line = define_rule(i, CFG)
         if line:
