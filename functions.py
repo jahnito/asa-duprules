@@ -2,7 +2,9 @@ import re
 import sqlite3
 import tomllib
 from pathlib import Path
+import ipaddress
 
+from classes import Rule
 from patterns import UPPER_OBJ, UPPER_L3_PROTO, UPPER_L4_PROTO
 from patterns import SUBRULE_L3, SUBRULE_L4
 
@@ -32,7 +34,7 @@ def init_app(config: str = 'asa_duprules.toml') -> dict:
         with open(sh_access_list, 'r') as f:
             rules = f.read().split('\n')
             cfg['rules'] = rules
-    init_database(cfg)
+    # init_database(cfg)
     return cfg
 
 
@@ -68,3 +70,24 @@ def ins_obj(re_match: re.Match, config: dict, table: str):
         cursor = conn.cursor()
         cursor.execute(query, tuple(finded_objects.values()))
         conn.commit()
+
+
+def create_rule_obj(config: dict):
+    database = config.get('database')
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        rows = cursor.execute('SELECT * FROM upper_rules WHERE obj_gr_serv IS NULL AND obj_gr_src IS NULL AND obj_gr_dst IS NULL;')
+        fields = [i[0] for i in cursor.description]
+        for row in rows:
+            for item in zip(fields, row):
+                print(dict(*item))
+                # r = Rule(dict(item))
+                # print(r)
+                input()
+
+
+def main(config: dict):
+    for line_rule in config['rules']:
+        line = define_rule(line_rule, config)
+        if line:
+            result += 1
