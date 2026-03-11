@@ -72,18 +72,24 @@ def ins_obj(re_match: re.Match, config: dict, table: str):
         conn.commit()
 
 
-def create_rule_obj_l3(config: dict):
+def create_rules_bulk(config: dict):
+    rules = []
     database = config.get('database')
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
-        rows = cursor.execute('SELECT * FROM upper_rules WHERE obj_gr_serv IS NULL AND obj_gr_src IS NULL AND obj_gr_dst IS NULL;')
+        rows = cursor.execute('SELECT * FROM upper_rules WHERE obj_gr_serv IS NULL AND obj_gr_src IS NULL AND object_src IS NULL AND obj_gr_dst IS NULL AND object_dst IS NULL;')
         fields = [i[0] for i in cursor.description]
         for row in rows:
             raw_data = {k: v for k, v in zip(fields, row) if v is not None}
-            r = Rule(raw_data)
-            print(r)
-            input()
-
+            rules.append(Rule(raw_data))
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+        rows = cursor.execute('SELECT * FROM rules;')
+        fields = [i[0] for i in cursor.description]
+        for row in rows:
+            raw_data = {k: v for k, v in zip(fields, row) if v is not None}
+            rules.append(Rule(raw_data))
+    return rules
 
 def main(config: dict):
     for line_rule in config['rules']:

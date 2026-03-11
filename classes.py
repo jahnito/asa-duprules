@@ -32,6 +32,8 @@ class Rule:
     def get_proto(self) -> str:
         if proto := self.raw_data.get('proto_l3'):
             return proto
+        if proto := self.raw_data.get('proto_num'):
+            return proto
         else:
             return self.raw_data['proto_l4']
 
@@ -53,21 +55,27 @@ class Rule:
 
     def get_proto_port(self):
         if port := self.raw_data.get('proto_port'):
-            if port and port.isalpha():
+            if port and not port.isdigit():
                 return L3_PROTO_LITTER[port]
             else:
                 return int(port)
 
     def get_proto_ports(self):
         if line := self.raw_data.get('proto_ports'):
-            return [
-                L3_PROTO_LITTER['value'] if value.isalpha() else int(value) for value in line.split()
+            a, b = [
+                L3_PROTO_LITTER[value] if value.isalpha() else int(value) for value in line.split()
             ]
+            return range(a, b + 1)
 
     def __str__(self):
+        if self.proto in ('tcp', 'udp',):
+            rule_level = 'L4'
+        else:
+            rule_level = 'L3'
         rule_line = (
+            f'Class <Rule> - {rule_level}\n'
             f'ID: {self.id}\n'
-            f'ZONE: {self.zone}\n'
+            f'ZONE: {self.zone} line {self.num_line}\n'
             f'RULE: {self.rule}\n'
             f'PROTO: {self.proto}\n'
             f'SOURCE: {self.src}\n'
@@ -76,5 +84,22 @@ class Rule:
         if self.port:
             rule_line += f'PORT: {self.port}'
         if self.ports:
-            rule_line += f'PORTS: {' '.join(self.ports)}'
+            rule_line += f'PORTS: {' '.join([str(i) for i in self.ports])}'
         return rule_line
+
+    def __eq__(self, other_rule):
+        compare_attrs = [
+                self.zone == other_rule.zone,
+                self.rule == other_rule.rule,
+                self.proto == other_rule.proto,
+                self.src == other_rule.src,
+                self.dst == other_rule.dst,
+                self.port == other_rule.port,
+            ]
+
+        if self.port and other_rule.port:
+            compare_attrs.append(self.proto == other_rule.proto)
+        if self.ports and other_rule.ports:
+            compare_attrs.append(self.ports == other_rule.ports)
+        return all(compare_attrs)
+

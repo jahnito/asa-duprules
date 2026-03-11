@@ -88,6 +88,7 @@ L3_PROTO_LITTER = {
     'snmptrap': 162,
     'ssh': 22,
     'syslog': 514,
+    'telnet': 23,
     'tftp': 69,
     'whois': 43,
     'www': 80,
