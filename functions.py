@@ -2,7 +2,6 @@ import re
 import sqlite3
 import tomllib
 from pathlib import Path
-import ipaddress
 
 from classes import Rule
 from patterns import UPPER_OBJ, UPPER_L3_PROTO, UPPER_L4_PROTO
@@ -77,7 +76,16 @@ def create_rules_bulk(config: dict):
     database = config.get('database')
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
-        rows = cursor.execute('SELECT * FROM upper_rules WHERE obj_gr_serv IS NULL AND obj_gr_src IS NULL AND object_src IS NULL AND obj_gr_dst IS NULL AND object_dst IS NULL;')
+        rows = cursor.execute(
+            (
+                'SELECT * FROM upper_rules '
+                'WHERE obj_gr_serv IS NULL AND '
+                'obj_gr_src IS NULL AND '
+                'object_src IS NULL AND '
+                'obj_gr_dst IS NULL AND '
+                'object_dst IS NULL;'
+            )
+        )
         fields = [i[0] for i in cursor.description]
         for row in rows:
             raw_data = {k: v for k, v in zip(fields, row) if v is not None}
@@ -90,6 +98,7 @@ def create_rules_bulk(config: dict):
             raw_data = {k: v for k, v in zip(fields, row) if v is not None}
             rules.append(Rule(raw_data))
     return rules
+
 
 def main(config: dict):
     for line_rule in config['rules']:

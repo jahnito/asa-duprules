@@ -1,4 +1,3 @@
-import sqlite3
 import ipaddress
 
 from patterns import L3_PROTO_LITTER
@@ -103,3 +102,10 @@ class Rule:
             compare_attrs.append(self.ports == other_rule.ports)
         return all(compare_attrs)
 
+    # def __contains__(self, other_rule):
+    #     compare_attrs = [
+    #         self.zone == other_rule.zone,
+    #         self.rule == other_rule.rule,
+    #         self.proto == other_rule.proto,
+    #     ]
+    #     if isinstance(self.src, ipaddress.ip_address)
