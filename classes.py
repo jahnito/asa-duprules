@@ -83,7 +83,7 @@ class Rule:
         if self.port:
             rule_line += f'PORT: {self.port}'
         if self.ports:
-            rule_line += f'PORTS: {' '.join([str(i) for i in self.ports])}'
+            rule_line += f'PORTS: {min(self.ports)}-{max(self.ports)}'
         return rule_line
 
     def __eq__(self, other_rule):
@@ -97,15 +97,120 @@ class Rule:
             ]
 
         if self.port and other_rule.port:
-            compare_attrs.append(self.proto == other_rule.proto)
+            compare_attrs.append(self.port == other_rule.port)
         if self.ports and other_rule.ports:
             compare_attrs.append(self.ports == other_rule.ports)
         return all(compare_attrs)
 
-    # def __contains__(self, other_rule):
-    #     compare_attrs = [
-    #         self.zone == other_rule.zone,
-    #         self.rule == other_rule.rule,
-    #         self.proto == other_rule.proto,
-    #     ]
-    #     if isinstance(self.src, ipaddress.ip_address)
+    def __contains__(self, other_rule):
+        # Если правила равны, то возвращаем False
+        if self == other_rule:
+            return False
+        # Обязательные атрибуты которые должны быть равны
+        compare_attrs = [
+            self.zone == other_rule.zone,
+            self.rule == other_rule.rule,
+            self.proto == other_rule.proto,
+        ]
+
+        # Проверка вхождения источника
+        # Адрес в адрес
+        if (
+            isinstance(self.src, ipaddress.IPv4Address)
+            and
+            isinstance(other_rule.src, ipaddress.IPv4Address)
+        ):
+            compare_attrs.append(
+                self.src == other_rule.src
+            )
+        # Адрес в подсеть
+        elif (
+            isinstance(other_rule.src, ipaddress.IPv4Address)
+            and
+            isinstance(self.src, ipaddress.IPv4Network)
+        ):
+            compare_attrs.append(
+                other_rule.src in self.src
+            )
+        # Сеть в сеть
+        elif (
+            isinstance(other_rule.src, ipaddress.IPv4Network)
+            and
+            isinstance(self.src, ipaddress.IPv4Network)
+        ):
+            compare_attrs.append(
+                (
+                    other_rule.src.network_address in self.src
+                    and
+                    other_rule.src.broadcast_address in self.src
+                )
+            )
+        elif (
+            isinstance(other_rule.src, ipaddress.IPv4Network)
+            and
+            isinstance(self.src, ipaddress.IPv4Address)
+        ):
+            return False
+
+        # Проверка вхождения назначения
+        # Адрес в адрес
+        if (
+            isinstance(self.dst, ipaddress.IPv4Address)
+            and
+            isinstance(other_rule.dst, ipaddress.IPv4Address)
+        ):
+            compare_attrs.append(
+                self.dst == other_rule.dst
+            )
+        # Адрес в подсеть
+        elif (
+            isinstance(other_rule.dst, ipaddress.IPv4Address)
+            and
+            isinstance(self.dst, ipaddress.IPv4Network)
+        ):
+            compare_attrs.append(
+                other_rule.dst in self.dst
+            )
+        # Сеть в сеть
+        elif (
+            isinstance(other_rule.dst, ipaddress.IPv4Network)
+            and
+            isinstance(self.dst, ipaddress.IPv4Network)
+        ):
+            compare_attrs.append(
+                (
+                    other_rule.dst.network_address in self.dst
+                    and
+                    other_rule.dst.broadcast_address in self.dst
+                )
+            )
+        elif (
+            isinstance(other_rule.dst, ipaddress.IPv4Network)
+            and
+            isinstance(self.dst, ipaddress.IPv4Address)
+        ):
+            return False
+
+        # Вхождение портов
+        # Порт в порт
+        if self.port and other_rule.port:
+            compare_attrs.append(
+                self.port == other_rule.port
+            )
+        # Порт в диапозон портов
+        elif other_rule.port and self.ports:
+            compare_attrs.append(
+                other_rule.port in self.ports
+            )
+        # Диапазон в диапазон
+        elif other_rule.ports and self.ports:
+            compare_attrs.append(
+                min(other_rule.ports) in self.ports
+                and
+                max(other_rule.ports) in self.ports
+            )
+        # Дипазон в один порт не может входить
+        elif other_rule.ports and self.port:
+            return False
+
+        return all(compare_attrs)
