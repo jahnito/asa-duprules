@@ -1,3 +1,6 @@
 database = "db.sqlite3"
 dataset = "sh_access_list.ios"
+queryset_file = "sql_dump.sql"
+init_db = true
+create_sql_dump = false
 debug = true

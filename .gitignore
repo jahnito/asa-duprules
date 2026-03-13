@@ -209,3 +209,6 @@ __marimo__/
 
 # Cisco config and show output
 *.ios
+
+# Temporary sql dumps
+sql_dump.sql
