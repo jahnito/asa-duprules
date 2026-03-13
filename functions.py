@@ -7,6 +7,7 @@ from datetime import datetime
 from classes import Rule
 from patterns import UPPER_OBJ, UPPER_L3_PROTO, UPPER_L4_PROTO
 from patterns import SUBRULE_L3, SUBRULE_L4
+from patterns import OBJ_NET, OBJ_NET_HOST, OBJ_NET_SUBNET, OBJ_NET_DESCRIPTION
 
 
 def init_database(config: dict):
@@ -70,7 +71,9 @@ def init_app(config: str = 'asa_duprules.toml') -> dict:
 
 
 def define_rule(line: str, config):
-    # Верхнеуровневое правило
+    """
+    Функция парсинга правил, создания INSERT-ов
+    """
     if line.startswith('access-list'):
         if re_match := re.fullmatch(UPPER_OBJ, line):
             create_query(re_match, config, 'upper_rules')
@@ -162,3 +165,30 @@ def fill_db(config: dict):
             query = '\n'.join(config['queryset_memory'])
             cursor.executescript(query)
         conn.commit()
+
+
+def parse_objects(line: str, parent_obj: dict|None):
+    if re_match := re.fullmatch(OBJ_NET, line):
+        return {re_match.group('obj_net'): []}
+    if re_match := re.fullmatch(OBJ_NET_HOST, line):
+        return parent_obj
+    if re_match := re.fullmatch(OBJ_NET_SUBNET, line):
+        return re_match, parent_obj
+    if re_match := re.fullmatch(OBJ_NET_DESCRIPTION, line):
+        return re_match, parent_obj
+
+def create_objects(config: dict):
+    # run_conf = config['run_conf']
+    run_conf = 'sh_run.ios'
+    with open(run_conf) as f:
+        rc = f.read().split('\n')
+
+    parent_obj = None
+    for line in rc:
+        if not line.startswith(' ') and parent_obj is not None:
+
+        res = parse_objects(line, parent_obj)
+        if res:
+            parent_obj = res[1]
+            print(res)
+            input()

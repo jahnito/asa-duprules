@@ -1,7 +1,8 @@
 from functions import init_app, create_rules_bulk
+from functions import create_objects
 
 
-cfg = init_app()
+# cfg = init_app()
 
 
 if __name__ == '__main__':
@@ -9,7 +10,7 @@ if __name__ == '__main__':
     #     for i in cfg['queryset_memory']:
     #         print(i)
     #         input()
-    pass
+    create_objects('cfg')
 
 
 

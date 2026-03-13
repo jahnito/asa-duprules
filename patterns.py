@@ -66,6 +66,23 @@ SUBRULE_L4 = (
 )
 
 
+OBJ_NET = (
+    r'^object\snetwork\s(?P<obj_net>.+)$'
+)
+
+OBJ_NET_HOST = (
+    r'^\s+host\s(?P<host>.+)$'
+)
+
+OBJ_NET_SUBNET = (
+    r'^\s+subnet\s(?P<subnet>.+)$'
+)
+
+OBJ_NET_DESCRIPTION = (
+    r'^\s+description\s(?P<description>.+)$'
+)
+
+
 L3_PROTO_LITTER = {
     'citrix-ica': 1494,
     'domain': 53,
