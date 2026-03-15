@@ -65,22 +65,38 @@ SUBRULE_L4 = (
     r'^\s{1,2}access-list\s(?P<zone>\S+)\sline\s(?P<num_line>\d+)\sextended\s(?P<rule>permit|deny)\s(?P<proto_l4>(tcp|udp))\s(?:host\s(?P<host_src>(?:\d{1,3}\.){3}\d{1,3})|(?P<prefix_src>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}\.){3}\d{1,3})|(?P<any_src>(?:any|any4)))\s(?:host\s(?P<host_dst>(?:\d{1,3}\.){3}\d{1,3})|(?P<prefix_dst>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}\.){3}\d{1,3})|(?P<any_dst>(?:any|any4)))\s(?:eq\s(?P<proto_port>(?:\S+|\d+))|range\s(?P<proto_ports>(?:(?:\d{1,5}|\S+)\s(?:\d{1,5}|\S+))))(?:\s(?P<inactive>inactive))?\s\(hitcnt=(?P<hit_count>\d+)\).+$'
 )
 
-
-OBJ_NET = (
-    r'^object\snetwork\s(?P<obj_net>.+)$'
+OBJ = (
+    r'(?P<grouped_obj>^object.+\n(?:^\s.+\n){1,})'
 )
 
-OBJ_NET_HOST = (
-    r'^\s+host\s(?P<host>.+)$'
-)
+OBJ_CONSIST = r'^\s(?:host\s(?P<obj_net_host>(?:\d{1,3}\.){3}\d{1,3})$|subnet\s(?P<obj_net_subnet>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}.){3}\d{1,3})$|description\s(?P<description>\S+)$|network-object\s(?:host\s(?P<obj_gr_host>(?:\d{1,3}\.){3}\d{1,3})$|(?P<obj_gr_subnet>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}.){3}\d{1,3})$|object\s(?P<obj_gr_obj>\S+$)))|group-object\s(?P<obj_gr_obj_gr>\S+$)'
 
-OBJ_NET_SUBNET = (
-    r'^\s+subnet\s(?P<subnet>.+)$'
-)
 
-OBJ_NET_DESCRIPTION = (
-    r'^\s+description\s(?P<description>.+)$'
-)
+OBJ_NET = r'^object\snetwork\s(?P<obj_net>\S+)$'
+
+
+OBJ_GR_NET = r'^object-group\snetwork\s(?P<obj_gr_net>\S+)$'
+
+
+# OBJ_NET = (
+#     r'^object\snetwork\s(?P<obj_net>.+)$'
+# )
+
+# OBJ_GR_NET = (
+#     r'^object-group\snetwork\s(?P<obj_gr_net>\S+)$'
+# )
+
+# OBJ_NET_HOST = (
+#     r'^\s+host\s(?P<host>.+)$'
+# )
+
+# OBJ_NET_SUBNET = (
+#     r'^\s+subnet\s(?P<subnet>.+)$'
+# )
+
+# OBJ_NET_DESCRIPTION = (
+#     r'^\s+description\s(?P<description>.+)$'
+# )
 
 
 L3_PROTO_LITTER = {

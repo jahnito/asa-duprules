@@ -214,3 +214,63 @@ class Rule:
             return False
 
         return all(compare_attrs)
+
+
+class ObjectNetwork:
+    def __init__(self, name: str, type_obj: str) -> None:
+        self.name = name
+        self.type_obj = type_obj
+        self.obj_gr_host = []
+        self.obj_gr_obj = []
+        self.obj_gr_obj_gr = []
+        self.obj_gr_subnet = []
+        self.obj_net_host = []
+        self.obj_net_subnet = []
+        self.description = None
+
+    def get_attrs(self, attrs: dict) -> None:
+        for k, v in attrs.items():
+            if v:
+                if k == 'description':
+                    self.description = v
+                if k == 'obj_gr_host':
+                    self.obj_gr_host.append(v)
+                if k == 'obj_gr_obj':
+                    self.obj_gr_obj.append(v)
+                if k == 'obj_gr_obj_gr':
+                    self.obj_gr_obj_gr.append(v)
+                if k == 'obj_gr_subnet':
+                    self.obj_gr_subnet.append(v)
+                if k == 'obj_net_host':
+                    self.obj_net_host.append(v)
+                if k == 'obj_net_subnet':
+                    self.obj_net_subnet.append(v)
+
+    def __str__(self):
+        line = f'Object <{self.name}> type <{self.type_obj}>'
+        if self.obj_net_host:
+            line += f'\nhost: {'\n  '.join(self.obj_net_host)}'
+        if self.obj_net_subnet:
+            line += f'\nsubnet: {'\n  '.join(self.obj_net_subnet)}'
+        if self.obj_gr_host:
+            line += f'\nhosts:\n  {'\n  '.join(self.obj_gr_host)}'
+        if self.obj_gr_subnet:
+            line += f'\nsubnets:\n  {'\n  '.join(self.obj_gr_subnet)}'
+        if self.obj_gr_obj:
+            line += f'\nobjects:\n  {'\n  '.join(self.obj_gr_obj)}'
+        if self.obj_gr_obj_gr:
+            line += f'\nobj_groups:\n  {'\n  '.join(self.obj_gr_obj_gr)}'
+        return line
+
+    def _make_list_attrs(self):
+        return [
+                self.obj_net_host,
+                self.obj_net_subnet,
+                self.obj_gr_host,
+                self.obj_gr_subnet,
+                self.obj_gr_obj,
+                self.obj_gr_obj_gr
+            ]
+
+    def __bool__(self):
+        return any(self._make_list_attrs())
