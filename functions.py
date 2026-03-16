@@ -65,9 +65,10 @@ def init_app(config: str = 'asa_duprules.toml') -> dict:
         with open(sh_access_list, 'r') as f:
             rules = f.read().split('\n')
             cfg['rules'] = rules
-    init_database(cfg)
     if cfg['init_db']:
-        fill_db(cfg)
+        init_database(cfg)
+        fill_db(cfg)     # Заносим в БД правила
+        create_objects(cfg)  # Парсим объекты в sh_run заносим в БД
     return cfg
 
 
@@ -77,16 +78,16 @@ def define_rule(line: str, config):
     """
     if line.startswith('access-list'):
         if re_match := re.fullmatch(UPPER_OBJ, line):
-            create_query(re_match, config, 'upper_rules')
+            create_query(re_match, config, 'upper_rules', line)
         if re_match := re.fullmatch(UPPER_L3_PROTO, line):
-            create_query(re_match, config, 'upper_rules')
+            create_query(re_match, config, 'upper_rules', line)
         if re_match := re.fullmatch(UPPER_L4_PROTO, line):
-            create_query(re_match, config, 'upper_rules')
+            create_query(re_match, config, 'upper_rules', line)
     if line.startswith(' '):
         if re_match := re.fullmatch(SUBRULE_L3, line):
-            create_query(re_match, config, 'rules')
+            create_query(re_match, config, 'rules', line)
         if re_match := re.fullmatch(SUBRULE_L4, line):
-            create_query(re_match, config, 'rules')
+            create_query(re_match, config, 'rules', line)
 
 
 def ins_obj(re_match: re.Match, config: dict, table: str):
@@ -104,8 +105,9 @@ def ins_obj(re_match: re.Match, config: dict, table: str):
         conn.commit()
 
 
-def create_query(re_match: re.Match, config: dict, table: str):
+def create_query(re_match: re.Match, config: dict, table: str, line: str):
     finded_objects = {k: v for k, v in re_match.groupdict().items() if v is not None}
+    finded_objects['original_line'] = line
     query = (
         f'INSERT INTO {table} ('
         f'{", ".join(finded_objects.keys())}'
@@ -168,26 +170,8 @@ def fill_db(config: dict):
         conn.commit()
 
 
-def parse_objects(line: str, parent_obj: dict|None):
-    if re_match := re.fullmatch(OBJ_NET, line):
-        return {'name': re_match.group('obj_net'), 'type': 'obj_net'}
-    if re_match := re.fullmatch(OBJ_GR_NET, line):
-        return {'name': re_match.group('obj_gr_net'), 'type': 'obj_gr_net'}
-    if parent_obj:
-        if re_match := re.fullmatch(OBJ_NET_HOST, line):
-            parent_obj['host'] = re_match.group('host')
-            return parent_obj
-        if re_match := re.fullmatch(OBJ_NET_SUBNET, line):
-            parent_obj['subnet'] = re_match.group('subnet')
-            return parent_obj
-        if re_match := re.fullmatch(OBJ_NET_DESCRIPTION, line):
-            parent_obj['description'] = re_match.group('description')
-            return parent_obj
-
-
 def create_objects(config: dict):
-    # run_conf = config['run_conf']
-    run_conf = 'sh_run.ios'
+    run_conf = config['run_conf']
     with open(run_conf) as f:
         run_conf = f.read()
 
@@ -203,6 +187,9 @@ def create_objects(config: dict):
             if line.startswith(' ') and (re_match := re.match(OBJ_CONSIST, line)):
                 object_conf.get_attrs(re_match.groupdict())
         if object_conf:
-            print(object_conf)
-            print('\n')
-        # input()
+            with sqlite3.connect('db.sqlite3') as conn:
+                cursor = conn.cursor()
+                cursor.executescript(object_conf.create_dump())
+        # else:
+        #     print('#' * 10, '   Пустой объект   ', '#' * 10)
+        #     print(object_conf)

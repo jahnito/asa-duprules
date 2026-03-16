@@ -1,4 +1,6 @@
 import ipaddress
+import sqlite3
+import re
 
 from patterns import L3_PROTO_LITTER
 
@@ -65,6 +67,25 @@ class Rule:
                 L3_PROTO_LITTER[value] if value.isalpha() else int(value) for value in line.split()
             ]
             return range(a, b + 1)
+
+    def get_upper_rule(self, config: dict) -> str:
+        query = (
+            'SELECT original_line FROM upper_rules '
+            f'WHERE zone="{self.zone}" and num_line={self.num_line};'
+        )
+        with sqlite3.connect(config['database']) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            result = cursor.fetchone()
+        pattern = r'line\s\d+\s|\s\(hitcnt=\d+\)\s.+'
+        return re.sub(pattern, '', result[0])
+
+    def get_upper_objects(self):
+        query = (
+            'SELECT obj_gr_src, host_src, object_scr, prefix_src, '
+            '       obj_gr_src, host_src, object_scr, prefix_src, '
+            f'FROM upper_rules WHERE zone="{self.zone}" and num_line={self.num_line}'
+        )
 
     def __str__(self):
         if self.proto in ('tcp', 'udp',):
@@ -246,6 +267,62 @@ class ObjectNetwork:
                 if k == 'obj_net_subnet':
                     self.obj_net_subnet.append(v)
 
+    def _make_list_attrs(self):
+        return [
+                self.obj_net_host,
+                self.obj_net_subnet,
+                self.obj_gr_host,
+                self.obj_gr_subnet,
+                self.obj_gr_obj,
+                self.obj_gr_obj_gr
+            ]
+
+    def create_dump(self):
+        result = [
+            (
+                'INSERT INTO asa_objects (name, obj_type, description) '
+                f'VALUES ("{self.name}", "{self.type_obj}",'
+                f' {'"' + self.description + '"' if self.description else 'NULL'});'
+            )
+        ]
+        if self.type_obj == 'obj_net':
+            if self.obj_net_host:
+                result.append(
+                    'INSERT INTO asa_obj_hosts (`host`, asa_object) VALUES '
+                    f'("{self.obj_net_host[0]}", (SELECT id FROM asa_objects WHERE name="{self.name}"));'
+                )
+            if self.obj_net_subnet:
+                result.append(
+                    'INSERT INTO asa_obj_subnets (`subnet`, asa_object) VALUES '
+                    f'("{self.obj_net_subnet[0]}", (SELECT id FROM asa_objects WHERE name="{self.name}"));'
+                )
+        if self.type_obj == 'obj_gr_net':
+            if self.obj_gr_host:
+                for host in self.obj_gr_host:
+                    result.append(
+                        'INSERT INTO asa_obj_hosts (`host`, asa_object) '
+                        f'VALUES ("{host}", (SELECT id FROM asa_objects WHERE name="{self.name}"));'
+                    )
+            if self.obj_gr_subnet:
+                for subnet in self.obj_gr_subnet:
+                    result.append(
+                        'INSERT INTO asa_obj_subnets (`subnet`, asa_object) '
+                        f'VALUES ("{subnet}", (SELECT id FROM asa_objects WHERE name="{self.name}"));'
+                    )
+            if self.obj_gr_obj:
+                for obj in self.obj_gr_obj:
+                    result.append(
+                        'INSERT INTO asa_obj_objects (`object`, asa_object) '
+                        f'VALUES ("{obj}", (SELECT id FROM asa_objects WHERE name="{self.name}"));'
+                    )
+            if self.obj_gr_obj_gr:
+                for group in self.obj_gr_obj_gr:
+                    result.append(
+                        'INSERT INTO asa_obj_groups (`group`, asa_object) '
+                        f'VALUES ("{group}", (SELECT id FROM asa_objects WHERE name="{self.name}"));'
+                    )
+        return '\n'.join(result)
+
     def __str__(self):
         line = f'Object <{self.name}> type <{self.type_obj}>'
         if self.obj_net_host:
@@ -261,16 +338,6 @@ class ObjectNetwork:
         if self.obj_gr_obj_gr:
             line += f'\nobj_groups:\n  {'\n  '.join(self.obj_gr_obj_gr)}'
         return line
-
-    def _make_list_attrs(self):
-        return [
-                self.obj_net_host,
-                self.obj_net_subnet,
-                self.obj_gr_host,
-                self.obj_gr_subnet,
-                self.obj_gr_obj,
-                self.obj_gr_obj_gr
-            ]
 
     def __bool__(self):
         return any(self._make_list_attrs())

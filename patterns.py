@@ -69,34 +69,13 @@ OBJ = (
     r'(?P<grouped_obj>^object.+\n(?:^\s.+\n){1,})'
 )
 
-OBJ_CONSIST = r'^\s(?:host\s(?P<obj_net_host>(?:\d{1,3}\.){3}\d{1,3})$|subnet\s(?P<obj_net_subnet>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}.){3}\d{1,3})$|description\s(?P<description>\S+)$|network-object\s(?:host\s(?P<obj_gr_host>(?:\d{1,3}\.){3}\d{1,3})$|(?P<obj_gr_subnet>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}.){3}\d{1,3})$|object\s(?P<obj_gr_obj>\S+$)))|group-object\s(?P<obj_gr_obj_gr>\S+$)'
+OBJ_CONSIST = r'^\s(?:host\s(?P<obj_net_host>(?:\d{1,3}\.){3}\d{1,3})$|subnet\s(?P<obj_net_subnet>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}.){3}\d{1,3})$|description\s(?P<description>\S+)$|network-object\s(?:host\s(?P<obj_gr_host>(?:\d{1,3}\.){3}\d{1,3})$|(?P<obj_gr_subnet>(?:\d{1,3}\.){3}\d{1,3}\s(?:\d{1,3}.){3}\d{1,3})$|object\s(?P<obj_gr_obj>\S+$))|group-object\s(?P<obj_gr_obj_gr>\S+$))'
 
 
 OBJ_NET = r'^object\snetwork\s(?P<obj_net>\S+)$'
 
 
 OBJ_GR_NET = r'^object-group\snetwork\s(?P<obj_gr_net>\S+)$'
-
-
-# OBJ_NET = (
-#     r'^object\snetwork\s(?P<obj_net>.+)$'
-# )
-
-# OBJ_GR_NET = (
-#     r'^object-group\snetwork\s(?P<obj_gr_net>\S+)$'
-# )
-
-# OBJ_NET_HOST = (
-#     r'^\s+host\s(?P<host>.+)$'
-# )
-
-# OBJ_NET_SUBNET = (
-#     r'^\s+subnet\s(?P<subnet>.+)$'
-# )
-
-# OBJ_NET_DESCRIPTION = (
-#     r'^\s+description\s(?P<description>.+)$'
-# )
 
 
 L3_PROTO_LITTER = {
