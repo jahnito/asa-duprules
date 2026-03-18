@@ -88,6 +88,7 @@ L3_PROTO_LITTER = {
     'isakmp': 500,
     'ldap': 389,
     'ldaps': 636,
+    'lotusnotes': 1352,
     'netbios-dgm': 138,
     'netbios-ns': 137,
     'netbios-ssn': 139,
